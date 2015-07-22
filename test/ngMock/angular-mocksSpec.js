@@ -1523,18 +1523,22 @@ describe('ngMock', function() {
             hb.flush();
             expect(callback).toHaveBeenCalledOnceWith(200, 'path', '', '');
           });
-          it('should match colon deliminated parameters in ' + routeShortcut + ' ' + method + ' method', function () {
-            hb[routeShortcut](method, '/route/:id/path/:s_id').respond('path');
-            hb(method, '/route/123/path/456', undefined, callback);
-            hb.flush();
-            expect(callback).toHaveBeenCalledOnceWith(200, 'path', '', '');
-          });
-          it('should ignore query param when matching in ' + routeShortcut + ' ' + method + ' method', function () {
-            hb[routeShortcut](method, '/route/:id').respond('path');
-            hb(method, '/route/123?q=str&foo=bar', undefined, callback);
-            hb.flush();
-            expect(callback).toHaveBeenCalledOnceWith(200, 'path', '', '');
-          });
+          it('should match colon deliminated parameters in ' + routeShortcut + ' ' + method + ' method',
+            function () {
+              hb[routeShortcut](method, '/route/:id/path/:s_id').respond('path');
+              hb(method, '/route/123/path/456', undefined, callback);
+              hb.flush();
+              expect(callback).toHaveBeenCalledOnceWith(200, 'path', '', '');
+            }
+          );
+          it('should ignore query param when matching in ' + routeShortcut + ' ' + method + ' method',
+            function () {
+              hb[routeShortcut](method, '/route/:id').respond('path');
+              hb(method, '/route/123?q=str&foo=bar', undefined, callback);
+              hb.flush();
+              expect(callback).toHaveBeenCalledOnceWith(200, 'path', '', '');
+            }
+          );
         });
       });
     });
