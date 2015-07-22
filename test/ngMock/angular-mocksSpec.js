@@ -956,6 +956,11 @@ describe('ngMock', function() {
       expect(typeof hb.whenHEAD).toBe("function");
     });
 
+    it('should provide "route" shortcuts for expect and when', function() {
+        expect(typeof hb.whenRoute).toBe("function");
+        expect(typeof hb.expectRoute).toBe("function");
+    });
+
 
     it('should respond with first matched definition', function() {
       hb.when('GET', '/url1').respond(200, 'content', {});
@@ -1136,14 +1141,14 @@ describe('ngMock', function() {
       });
 
       it('should take function', function() {
-        hb.expect('GET', '/some').respond(function(m, u, d, h) {
-          return [301, m + u + ';' + d + ';a=' + h.a, {'Connection': 'keep-alive'}, 'Moved Permanently'];
+        hb.expect('GET', '/some?q=s').respond(function(m, u, d, h, p) {
+          return [301, m + u + ';' + d + ';a=' + h.a + ';q=' + p.q, {'Connection': 'keep-alive'}, 'Moved Permanently'];
         });
 
-        hb('GET', '/some', 'data', callback, {a: 'b'});
+        hb('GET', '/some?q=s', 'data', callback, {a: 'b'});
         hb.flush();
 
-        expect(callback).toHaveBeenCalledOnceWith(301, 'GET/some;data;a=b', 'Connection: keep-alive', 'Moved Permanently');
+        expect(callback).toHaveBeenCalledOnceWith(301, 'GET/some?q=s;data;a=b;q=s', 'Connection: keep-alive', 'Moved Permanently');
       });
 
       it('should default response headers to ""', function() {
@@ -1503,6 +1508,32 @@ describe('ngMock', function() {
             hb(method, '/foo', undefined, callback);
             hb.flush();
             expect(callback).toHaveBeenCalledOnceWith(200, 'bar', '', '');
+          });
+        });
+      });
+    });
+
+    describe('expectRoute/whenRoute shortcuts', function () {
+      angular.forEach(['expect', 'when'], function(prefix) {
+        angular.forEach(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'JSONP'], function(method) {
+          var routeShortcut = prefix + 'Route';
+          it('should provide ' + routeShortcut + ' shortcut with ' + method + ' method', function () {
+            hb[routeShortcut](method, '/route').respond('path');
+            hb(method, '/route', undefined, callback);
+            hb.flush();
+            expect(callback).toHaveBeenCalledOnceWith(200, 'path', '', '');
+          });
+          it('should match colon deliminated parameters in ' + routeShortcut + ' ' + method + ' method', function () {
+            hb[routeShortcut](method, '/route/:id/path/:s_id').respond('path');
+            hb(method, '/route/123/path/456', undefined, callback);
+            hb.flush();
+            expect(callback).toHaveBeenCalledOnceWith(200, 'path', '', '');
+          });
+          it('should ignore query param when matching in ' + routeShortcut + ' ' + method + ' method', function () {
+            hb[routeShortcut](method, '/route/:id').respond('path');
+            hb(method, '/route/123?q=str&foo=bar', undefined, callback);
+            hb.flush();
+            expect(callback).toHaveBeenCalledOnceWith(200, 'path', '', '');
           });
         });
       });
